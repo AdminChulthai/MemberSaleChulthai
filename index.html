@@ -253,7 +253,7 @@
 
         let currentEmpId = '';
         let currentCouponData = null;
-        let html5QrcodeScanner = null;
+        let html5QrCode = null;
         let isScanning = false;
 
         // ---------- ระบบติดต่อ Backend (Fetch API) ----------
@@ -427,12 +427,15 @@
             const scanBtn = document.getElementById('scan-btn');
 
             if (isScanning) {
-                if (html5QrcodeScanner) {
-                    html5QrcodeScanner.clear().then(() => {
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        html5QrCode.clear();
                         readerDiv.style.display = 'none';
                         scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
                         scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
                         isScanning = false;
+                    }).catch(err => {
+                        console.error("Failed to stop scanner", err);
                     });
                 }
             } else {
@@ -441,16 +444,45 @@
                 scanBtn.className = 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-600 transition shadow-md flex justify-center items-center gap-2 mt-2';
                 isScanning = true;
 
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+                
+                // เริ่มเปิดกล้องหลัง (environment)
+                html5QrCode.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanFailure
+                ).catch((err) => {
+                    // กรณีเปิดกล้องไม่สำเร็จ
+                    isScanning = false;
+                    readerDiv.style.display = 'none';
+                    scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
+                    scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
+                    showMsg('เปิดกล้องไม่ได้', 'กรุณาอนุญาตให้เว็บเข้าถึงกล้อง หรือตรวจสอบว่าเปิดเว็บผ่าน HTTPS แล้ว', false);
+                });
             }
         }
 
         function onScanSuccess(decodedText, decodedResult) {
             document.getElementById('coupon-input').value = decodedText;
-            toggleScanner(); 
-            searchCoupon();  
+            
+            // ปิดกล้องหลังสแกนสำเร็จ
+            if (html5QrCode && isScanning) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    document.getElementById('reader').style.display = 'none';
+                    const scanBtn = document.getElementById('scan-btn');
+                    scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
+                    scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
+                    isScanning = false;
+                    
+                    searchCoupon();  
+                });
+            } else {
+                searchCoupon();
+            }
         }
         function onScanFailure(error) { /* ปล่อยผ่าน */ }
 
