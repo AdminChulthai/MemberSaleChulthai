@@ -6,11 +6,14 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ระบบสมาชิกฝ่ายขาย</title>
+    <title>ระบบสมาชิกฝ่ายขาย - จุลไหมไทย</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/0NP9YsLz/Logo-CTS.png">
+    
     <!-- ฟอนต์ K2D -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=K2D:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- HTML5 QR Code Scanner -->
@@ -28,6 +31,7 @@
             color: white;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+        /* ซ่อนกล่องสแกนเนอร์ตอนเริ่มต้น */
         #reader { width: 100%; max-width: 400px; margin: 0 auto; display: none; overflow: hidden; border-radius: 1rem; }
         #reader video { border-radius: 1rem; object-fit: cover; }
         
@@ -101,14 +105,15 @@
             </button>
         </div>
         
-        <div class="mt-6 text-center text-xs text-gray-400" id="version-text">
-            อัพเดทล่าสุด 09/03/2569
+        <div class="mt-6 text-center text-xs text-gray-400" id="app-version-display">
+            กำลังโหลดข้อมูลเวอร์ชัน...
         </div>
     </div>
 
     <!-- ==================== 2. หน้าหลัก (แอปพลิเคชัน) ==================== -->
     <div id="app-section" class="w-full max-w-md hidden opacity-0 transition-opacity duration-500">
         
+        <!-- ส่วนหัว Gradient Card -->
         <div class="card-bg rounded-3xl p-6 relative overflow-hidden mb-6">
             <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
@@ -135,6 +140,7 @@
             </div>
         </div>
 
+        <!-- หน้าใช้คูปอง (การ์ดขาว) -->
         <div id="home-tab" class="w-full mb-6">
             <h3 class="font-bold text-gray-800 mb-3 px-2 text-lg">สแกนหรือระบุรหัสคูปอง</h3>
             
@@ -157,6 +163,7 @@
             </div>
         </div>
 
+        <!-- หน้าเมนู (ซ่อนไว้เริ่มต้น) -->
         <div id="menu-tab" class="w-full hidden mb-6">
             <h3 class="font-bold text-gray-800 mb-3 px-2 text-lg">เมนูระบบ</h3>
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -246,18 +253,31 @@
 
     <!-- ==================== JavaScript ควบคุมการทำงาน ==================== -->
     <script>
-        // =========================================================================
-        // ⚠️ นำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ในบรรทัดด้านล่างนี้
-        // =========================================================================
-        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzwR4VoSvHf2xmlLkYE8z8vyFr_wISzoPdz9zrPpI6xZ-l8JhLk6pRnpENOiWXgR5-mww/exec";
+        // ========================================================
+        // ⚙️ ตั้งค่า: ลิงก์เชื่อมต่อฐานข้อมูล GAS (API) ของคุณ
+        // ========================================================
+        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzwR4VoSvHf2xmlLkYE8z8vyFr_wISzoPdz9zrPpI6xZ-l8JhLk6pRnpENOiWXgR5-mww/exec"; // <--- นำ URL ที่ได้จากการ Deploy Web App มาใส่ตรงนี้
+        // ========================================================
 
         let currentEmpId = '';
         let currentCouponData = null;
-        let html5QrCode = null;
+        let html5QrCode = null; // อัปเดตตัวแปรสแกนเนอร์
         let isScanning = false;
+
+        // โหลดข้อมูลเวอร์ชันแอปเมื่อเปิดหน้าเว็บ
+        window.onload = function() {
+            if(GAS_WEBAPP_URL === "YOUR_GAS_WEB_APP_URL_HERE") {
+                document.getElementById('app-version-display').innerHTML = '<span class="text-red-500 font-bold">⚠️ กรุณาตั้งค่า GAS_WEBAPP_URL ในโค้ดก่อนใช้งาน</span>';
+            } else {
+                fetchAppVersion();
+            }
+        };
 
         // ---------- ระบบติดต่อ Backend (Fetch API) ----------
         async function callGasApi(action, data = {}) {
+            if (GAS_WEBAPP_URL === "YOUR_GAS_WEB_APP_URL_HERE") {
+                throw new Error("ยังไม่ได้กำหนด URL ของ Google Apps Script (GAS_WEBAPP_URL)");
+            }
             try {
                 const response = await fetch(GAS_WEBAPP_URL, {
                     method: 'POST',
@@ -266,9 +286,21 @@
                 });
                 return await response.json();
             } catch (error) {
-                console.error("API Fetch Error:", error);
-                throw error;
+                console.error("API Error:", error);
+                throw new Error("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ โปรดตรวจสอบอินเทอร์เน็ต");
             }
+        }
+
+        // ดึงเวอร์ชันมาแสดง
+        function fetchAppVersion() {
+            callGasApi('getAppVersion', {})
+                .then(res => {
+                    if (res.success) {
+                        document.getElementById('app-version-display').innerText = res.version;
+                    }
+                }).catch(err => {
+                    document.getElementById('app-version-display').innerText = "เชื่อมต่อฐานข้อมูลไม่ได้";
+                });
         }
 
         // ---------- ระบบ UI ทั่วไป ----------
@@ -354,6 +386,7 @@
             const progBar = document.getElementById('progress-bar');
             const progText = document.getElementById('progress-text');
             
+            // อนิเมชั่นหลอดโหลดจำลอง
             let loadingInterval = setInterval(() => {
                 if (progress < 85) {
                     progress += Math.floor(Math.random() * 10) + 5;
@@ -363,11 +396,11 @@
                 }
             }, 150);
 
-            // ใช้ API ผ่าน fetch แทน google.script.run
+            // เรียกใช้งาน Backend ผ่าน Fetch API
             callGasApi('verifyLogin', { empId: empIdInput })
                 .then(response => {
+                    clearInterval(loadingInterval);
                     if (response.success) {
-                        clearInterval(loadingInterval);
                         progBar.style.width = '100%';
                         progText.innerText = '100%';
                         
@@ -384,7 +417,6 @@
                             resetLoginUI();
                         }, 500);
                     } else {
-                        clearInterval(loadingInterval);
                         resetLoginUI();
                         showMsg('เข้าสู่ระบบไม่สำเร็จ', response.message, false);
                     }
@@ -392,7 +424,7 @@
                 .catch(err => {
                     clearInterval(loadingInterval);
                     resetLoginUI();
-                    showMsg('ข้อผิดพลาดการเชื่อมต่อ', err.message || 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', false);
+                    showMsg('ข้อผิดพลาด', err.message, false);
                 });
         }
 
@@ -415,7 +447,7 @@
             setTimeout(() => {
                 appSection.classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
-                switchTab('home'); 
+                switchTab('home'); // Reset tab
                 clearCouponDetails();
                 if(isScanning) toggleScanner();
             }, 300);
@@ -495,11 +527,11 @@
 
             showLoading('กำลังค้นหาข้อมูลคูปอง...');
 
-            // ใช้ API
-            callGasApi('searchCouponData', { couponCode: code })
+            // เรียก API ค้นหาคูปองผ่าน Fetch
+            callGasApi('searchCoupon', { couponCode: code })
                 .then(response => {
                     hideLoading();
-                    if (response.found) {
+                    if (response.success && response.found) {
                         openRewardDetail(code, response);
                     } else {
                         showMsg('ไม่พบข้อมูล', response.message, false);
@@ -563,11 +595,11 @@
             closeConfirmModal();
             showLoading('กำลังบันทึกการทำรายการ...');
 
-            // ใช้ API
-            callGasApi('saveCouponUsage', { 
+            // เรียก API บันทึกการใช้งานผ่าน Fetch
+            callGasApi('saveUsage', {
                 empId: currentEmpId, 
                 couponCode: currentCouponData.code, 
-                points: currentCouponData.points 
+                points: currentCouponData.points
             })
             .then(response => {
                 hideLoading();
