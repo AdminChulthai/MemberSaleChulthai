@@ -544,7 +544,7 @@
                     if (response.success && response.found) {
                         openRewardDetail(code, response);
                     } else {
-                        showMsg('ไม่พบข้อมูล', response.message, false);
+                        showMsg('แจ้งเตือน', response.message, false);
                         document.getElementById('coupon-input').value = '';
                     }
                 })
