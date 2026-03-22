@@ -486,7 +486,12 @@
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     onScanSuccess,
                     onScanFailure
-                ).catch((err) => {
+                ).then(() => {
+                    // เมื่อเปิดกล้องสำเร็จ ให้เลื่อนหน้าจอลงมาที่กล่องสแกนอัตโนมัติ
+                    setTimeout(() => {
+                        readerDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }).catch((err) => {
                     // กรณีเปิดกล้องไม่สำเร็จ
                     isScanning = false;
                     readerDiv.style.display = 'none';
