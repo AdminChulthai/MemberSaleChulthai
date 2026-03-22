@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ======================================================== -->
+    <!-- ⚙️ ตั้งค่าส่วนที่ 1: ชื่อหน้าเว็บและไอคอน (Favicon)            -->
+    <!-- ======================================================== -->
     <title>SaleChulthai</title>
     <link rel="icon" type="image/png" href="https://i.postimg.cc/0NP9YsLz/Logo-CTS.png">
-    
+    <!-- ======================================================== -->
+
     <!-- ฟอนต์ K2D -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,16 +20,8 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     
     <style>
-        body {
-            font-family: 'K2D', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
-        }
-        .card-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
-            color: white;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
+        body { font-family: 'K2D', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        .card-bg { background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%); color: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
         /* ซ่อนกล่องสแกนเนอร์ตอนเริ่มต้น */
         #reader { width: 100%; max-width: 400px; margin: 0 auto; display: none; overflow: hidden; border-radius: 1rem; }
         #reader video { border-radius: 1rem; object-fit: cover; }
@@ -43,9 +39,7 @@
     <div id="msg-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black bg-opacity-50 transition-opacity backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 w-80 text-center shadow-2xl transform scale-100 animate-fade-in-up">
             <div id="msg-icon-container" class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-blue-100 mb-4">
-                <svg id="msg-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <svg id="msg-icon" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <h3 id="msg-title" class="text-xl font-bold mb-2 text-gray-800">แจ้งเตือน</h3>
             <p id="msg-text" class="text-sm text-gray-600 mb-6 whitespace-pre-wrap leading-relaxed"></p>
@@ -56,10 +50,7 @@
     <!-- ==================== 1. หน้าเข้าสู่ระบบ ==================== -->
     <div id="login-section" class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 transition-all duration-500 mt-4">
         <div class="text-center mb-8">
-            <img src="https://drive.google.com/thumbnail?id=1mqBzzmA7Ov-OFfvk2lwaFtSzWmKtqc61&sz=w500" 
-                 alt="จุลไหมไทย โลโก้" 
-                 class="w-32 h-32 mx-auto object-contain mb-4 drop-shadow-md rounded-full bg-white p-1 border-2 border-gray-50"
-                 onerror="this.src='https://placehold.co/150x150/e2e8f0/475569?text=Logo'">
+            <img src="https://drive.google.com/thumbnail?id=1mqBzzmA7Ov-OFfvk2lwaFtSzWmKtqc61&sz=w500" alt="จุลไหมไทย โลโก้" class="w-32 h-32 mx-auto object-contain mb-4 drop-shadow-md rounded-full bg-white p-1 border-2 border-gray-50" onerror="this.src='https://placehold.co/150x150/e2e8f0/475569?text=Logo'">
             <h1 class="text-2xl font-bold text-gray-800 tracking-wide">ระบบสมาชิกฝ่ายขาย</h1>
             <h2 class="text-xl font-medium text-blue-800">จุลไหมไทย</h2>
         </div>
@@ -68,15 +59,9 @@
             <div>
                 <label for="emp-id" class="block text-sm font-semibold text-gray-700 mb-2">รหัสพนักงาน (6 หลัก)</label>
                 <div class="relative">
-                    <input type="password" id="emp-id" maxlength="6" 
-                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-center text-xl tracking-widest font-bold pr-12 outline-none"
-                           placeholder="XXXXXX"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="password" id="emp-id" maxlength="6" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-center text-xl tracking-widest font-bold pr-12 outline-none" placeholder="XXXXXX" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                     <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
-                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </button>
                 </div>
             </div>
@@ -91,15 +76,14 @@
                 </div>
             </div>
 
-            <button id="loginBtn" onclick="handleLogin()" 
-                    class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex justify-center items-center gap-2">
+            <button id="loginBtn" onclick="handleLogin()" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex justify-center items-center gap-2">
                 <span id="btnText">เข้าสู่ระบบ</span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
             </button>
         </div>
         
-        <div id="app-version-display" class="mt-6 text-center text-xs text-gray-400">
-            กำลังโหลดเวอร์ชัน...
+        <div class="mt-6 text-center text-xs text-gray-400" id="app-version-display">
+            กำลังโหลดข้อมูลเวอร์ชัน...
         </div>
     </div>
 
@@ -118,8 +102,7 @@
                         <h2 class="text-3xl font-bold tracking-tight mt-1">ระบบรับคูปอง</h2>
                     </div>
                     <div class="bg-white text-blue-800 px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        ออนไลน์
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>ออนไลน์
                     </div>
                 </div>
 
@@ -139,8 +122,7 @@
             
             <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                 <div class="flex gap-2 mb-4">
-                    <input type="text" id="coupon-input" placeholder="กรอกรหัสคูปอง..." 
-                           class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-center tracking-wider font-semibold text-gray-700 bg-gray-50">
+                    <input type="text" id="coupon-input" placeholder="กรอกรหัสคูปอง..." class="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-center tracking-wider font-semibold text-gray-700 bg-gray-50">
                     <button onclick="searchCoupon()" class="bg-blue-800 text-white px-5 py-3 rounded-xl hover:bg-blue-900 transition shadow-md flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </button>
@@ -156,7 +138,7 @@
             </div>
         </div>
 
-        <!-- หน้าเมนู (ซ่อนไว้เริ่มต้น) -->
+        <!-- หน้าเมนู -->
         <div id="menu-tab" class="w-full hidden mb-6">
             <h3 class="font-bold text-gray-800 mb-3 px-2 text-lg">เมนูระบบ</h3>
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -168,7 +150,7 @@
         </div>
     </div>
 
-    <!-- ==================== 3. หน้าต่างรายละเอียดของรางวัล (Slide from right) ==================== -->
+    <!-- ==================== 3. หน้าต่างรายละเอียดของรางวัล ==================== -->
     <div id="reward-detail-modal" class="fixed inset-0 z-50 hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 max-w-md mx-auto shadow-2xl">
         <div class="px-4 py-3 flex items-center border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
             <button onclick="closeRewardDetail()" class="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition">
@@ -214,9 +196,7 @@
     <div id="confirm-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-2xl relative transform scale-100 animate-fade-in-up">
             <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-green-100 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <h3 class="text-xl font-bold text-gray-900 mb-2">ยืนยันการรับสิทธิ์?</h3>
             <p id="confirm-text" class="text-sm text-gray-500 mb-6 leading-relaxed"></p>
@@ -244,12 +224,13 @@
         </div>
     </div>
 
-    <!-- ==================== JavaScript ควบคุมการทำงาน ==================== -->
+    <!-- ==================== Script & API Integration ==================== -->
     <script>
         // ========================================================
         // ⚙️ ตั้งค่าส่วนที่ 2: ลิงก์เชื่อมต่อฐานข้อมูล GAS (API)
+        // นำ Web app URL ที่ได้จาก Apps Script มาใส่ตรงนี้
         // ========================================================
-        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzwR4VoSvHf2xmlLkYE8z8vyFr_wISzoPdz9zrPpI6xZ-l8JhLk6pRnpENOiWXgR5-mww/exec"; // <--- นำ URL ของ Web App มาใส่ตรงนี้
+        const GAS_WEBAPP_URL = "YOUR_GAS_WEB_APP_URL_HERE";
         // ========================================================
 
         let currentEmpId = '';
@@ -257,17 +238,17 @@
         let html5QrcodeScanner = null;
         let isScanning = false;
 
-        // 2. ฟังก์ชันหลักสำหรับสื่อสารกับ Backend (Fetch API)
+        // --- ฟังก์ชันหลักสำหรับสื่อสารกับ Backend (Fetch API) ---
         async function callGasApi(action, data = {}) {
             if (GAS_WEBAPP_URL === "YOUR_GAS_WEB_APP_URL_HERE") {
-                showMsg("ข้อผิดพลาด", "กรุณาตั้งค่า GAS_WEBAPP_URL ในโค้ด HTML ก่อนใช้งาน", false);
-                throw new Error("Missing API URL");
+                showMsg("ตั้งค่าไม่สมบูรณ์", "กรุณาใส่ URL ของ Google Apps Script ในไฟล์ HTML ก่อนใช้งาน", false);
+                throw new Error("Missing GAS_WEBAPP_URL");
             }
             try {
                 const response = await fetch(GAS_WEBAPP_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: action, data: data }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // สำคัญ: ป้องกันปัญหา CORS
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // ป้องกันปัญหา CORS
                 });
                 return await response.json();
             } catch (error) {
@@ -276,16 +257,15 @@
             }
         }
 
-        // ดึงเวอร์ชันเมื่อโหลดหน้าเว็บ
-        window.onload = () => {
-            if (GAS_WEBAPP_URL !== "YOUR_GAS_WEB_APP_URL_HERE") {
-                callGasApi('getAppVersion', {})
-                    .then(res => {
-                        if(res.success) {
-                            document.getElementById('app-version-display').innerText = res.version;
-                        }
-                    })
-                    .catch(err => console.log("โหลดเวอร์ชันไม่สำเร็จ", err));
+        // ดึง Version จาก Backend ทันทีเมื่อเปิดหน้าเว็บ
+        window.onload = async function() {
+            try {
+                const res = await callGasApi('getConfig');
+                if(res.success) {
+                    document.getElementById('app-version-display').innerText = res.version;
+                }
+            } catch (error) {
+                document.getElementById('app-version-display').innerText = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
             }
         };
 
@@ -293,10 +273,8 @@
         function showMsg(title, text, isSuccess = false) {
             document.getElementById('msg-title').innerText = title;
             document.getElementById('msg-text').innerText = text;
-            
             const iconContainer = document.getElementById('msg-icon-container');
             const icon = document.getElementById('msg-icon');
-            
             if (isSuccess) {
                 iconContainer.className = 'mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-green-100 mb-4';
                 icon.className = 'h-8 w-8 text-green-600';
@@ -306,22 +284,12 @@
                 icon.className = 'h-8 w-8 text-red-600';
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
             }
-            
             document.getElementById('msg-modal').classList.remove('hidden');
         }
 
-        function closeMsg() {
-            document.getElementById('msg-modal').classList.add('hidden');
-        }
-
-        function showLoading(text) {
-            document.getElementById('loading-overlay-text').innerText = text || 'กำลังประมวลผล...';
-            document.getElementById('loading-overlay').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-        }
+        function closeMsg() { document.getElementById('msg-modal').classList.add('hidden'); }
+        function showLoading(text) { document.getElementById('loading-overlay-text').innerText = text || 'กำลังประมวลผล...'; document.getElementById('loading-overlay').classList.remove('hidden'); }
+        function hideLoading() { document.getElementById('loading-overlay').classList.add('hidden'); }
 
         function togglePasswordVisibility() {
             const input = document.getElementById('emp-id');
@@ -336,27 +304,21 @@
         }
 
         function switchTab(tab) {
-            ['home', 'menu'].forEach(t => {
-                const el = document.getElementById(t + '-tab');
-                el.classList.add('hidden');
-            });
-
+            ['home', 'menu'].forEach(t => document.getElementById(t + '-tab').classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-blue-800', 'border-blue-800');
                 btn.classList.add('text-gray-400', 'border-transparent');
             });
-
             document.getElementById(tab + '-tab').classList.remove('hidden');
             const activeNav = document.getElementById('nav-' + tab);
             activeNav.classList.remove('text-gray-400', 'border-transparent');
             activeNav.classList.add('text-blue-800', 'border-blue-800');
             
-            // ปิดกล้องถ้าเปลี่ยนหน้า
-            if(tab !== 'home' && isScanning) toggleScanner();
+            if(tab !== 'home' && isScanning) toggleScanner(); // ปิดกล้องถ้าเปลี่ยนหน้า
         }
 
-        // ---------- ระบบเข้าสู่ระบบ ----------
-        function handleLogin() {
+        // ---------- ระบบเข้าสู่ระบบ (ผ่าน API) ----------
+        async function handleLogin() {
             const empIdInput = document.getElementById('emp-id').value.trim();
             if (empIdInput.length !== 6) {
                 showMsg('ข้อมูลไม่ถูกต้อง', 'กรุณากรอกรหัสพนักงานให้ครบ 6 หลัก', false);
@@ -372,7 +334,6 @@
             const progBar = document.getElementById('progress-bar');
             const progText = document.getElementById('progress-text');
             
-            // อนิเมชั่นหลอดโหลดจำลอง
             let loadingInterval = setInterval(() => {
                 if (progress < 85) {
                     progress += Math.floor(Math.random() * 10) + 5;
@@ -382,38 +343,36 @@
                 }
             }, 150);
 
-            // เรียกใช้ Backend ผ่าน Fetch API แทน google.script.run
-            callGasApi('verifyLogin', { empId: empIdInput })
-                .then(response => {
-                    if (response.success) {
-                        clearInterval(loadingInterval);
-                        progBar.style.width = '100%';
-                        progText.innerText = '100%';
-                        
-                        currentEmpId = empIdInput;
-                        document.getElementById('disp-id').innerText = currentEmpId;
-                        
-                        setTimeout(() => {
-                            document.getElementById('login-section').classList.add('hidden');
-                            const appSection = document.getElementById('app-section');
-                            appSection.classList.remove('hidden');
-                            document.getElementById('bottom-nav').classList.remove('hidden');
-                            setTimeout(() => appSection.classList.remove('opacity-0'), 50);
-                            
-                            // Reset
-                            resetLoginUI();
-                        }, 500);
-                    } else {
-                        clearInterval(loadingInterval);
+            try {
+                // เรียกใช้ API แทน google.script.run
+                const response = await callGasApi('verifyLogin', { empId: empIdInput });
+                
+                clearInterval(loadingInterval);
+                
+                if (response.success) {
+                    progBar.style.width = '100%';
+                    progText.innerText = '100%';
+                    
+                    currentEmpId = empIdInput;
+                    document.getElementById('disp-id').innerText = currentEmpId;
+                    
+                    setTimeout(() => {
+                        document.getElementById('login-section').classList.add('hidden');
+                        const appSection = document.getElementById('app-section');
+                        appSection.classList.remove('hidden');
+                        document.getElementById('bottom-nav').classList.remove('hidden');
+                        setTimeout(() => appSection.classList.remove('opacity-0'), 50);
                         resetLoginUI();
-                        showMsg('เข้าสู่ระบบไม่สำเร็จ', response.message, false);
-                    }
-                })
-                .catch(err => {
-                    clearInterval(loadingInterval);
+                    }, 500);
+                } else {
                     resetLoginUI();
-                    showMsg('ข้อผิดพลาด', err.message, false);
-                });
+                    showMsg('เข้าสู่ระบบไม่สำเร็จ', response.message, false);
+                }
+            } catch (err) {
+                clearInterval(loadingInterval);
+                resetLoginUI();
+                showMsg('ข้อผิดพลาด', err.message || "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", false);
+            }
         }
 
         function resetLoginUI() {
@@ -427,7 +386,6 @@
         function logout() {
             currentEmpId = '';
             document.getElementById('emp-id').value = '';
-            
             document.getElementById('bottom-nav').classList.add('hidden');
             const appSection = document.getElementById('app-section');
             appSection.classList.add('opacity-0');
@@ -435,7 +393,7 @@
             setTimeout(() => {
                 appSection.classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
-                switchTab('home'); // Reset tab
+                switchTab('home'); 
                 clearCouponDetails();
                 if(isScanning) toggleScanner();
             }, 300);
@@ -461,8 +419,8 @@
                 scanBtn.className = 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-600 transition shadow-md flex justify-center items-center gap-2 mt-2';
                 isScanning = true;
 
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+                // ไลบรารีจะขออนุญาตใช้งานกล้องอัตโนมัติ (จำเป็นต้องใช้งานบนเว็บที่เป็น HTTPS เช่น Github Pages)
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
                 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             }
         }
@@ -474,7 +432,8 @@
         }
         function onScanFailure(error) { /* ปล่อยผ่าน */ }
 
-        function searchCoupon() {
+        // ---------- ค้นหาคูปอง (ผ่าน API) ----------
+        async function searchCoupon() {
             const code = document.getElementById('coupon-input').value.trim();
             if (!code) {
                 showMsg('แจ้งเตือน', 'กรุณาระบุรหัสคูปอง หรือ สแกนคิวอาร์โค้ดก่อน', false);
@@ -483,21 +442,21 @@
 
             showLoading('กำลังค้นหาข้อมูลคูปอง...');
 
-            // เรียกใช้ Backend ผ่าน Fetch API
-            callGasApi('searchCoupon', { couponCode: code })
-                .then(response => {
-                    hideLoading();
-                    if (response.found) {
-                        openRewardDetail(code, response);
-                    } else {
-                        showMsg('ไม่พบข้อมูล', response.message, false);
-                        document.getElementById('coupon-input').value = '';
-                    }
-                })
-                .catch(err => {
-                    hideLoading();
-                    showMsg('ข้อผิดพลาด', err.message, false);
-                });
+            try {
+                // เรียกใช้ API แทน google.script.run
+                const response = await callGasApi('searchCoupon', { couponCode: code });
+                hideLoading();
+                
+                if (response.found) {
+                    openRewardDetail(code, response);
+                } else {
+                    showMsg('ไม่พบข้อมูล', response.message, false);
+                    document.getElementById('coupon-input').value = '';
+                }
+            } catch (err) {
+                hideLoading();
+                showMsg('ข้อผิดพลาด', err.message || "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", false);
+            }
         }
 
         // ---------- ระบบแสดงผลรายละเอียด Modal ----------
@@ -530,18 +489,16 @@
             document.getElementById('coupon-input').value = '';
         }
 
-        // ---------- ระบบบันทึกการแลกรางวัล ----------
+        // ---------- ระบบบันทึกการแลกรางวัล (ผ่าน API) ----------
         function openConfirmModal() {
             if (!currentEmpId || !currentCouponData) return;
             document.getElementById('confirm-text').innerHTML = `โปรดยืนยันการรับสิทธิ์สำหรับคูปอง<br><b class="text-blue-800 text-lg">${currentCouponData.name}</b><br><br>แต้มที่ต้องใช้: ${currentCouponData.points}`;
             document.getElementById('confirm-modal').classList.remove('hidden');
         }
 
-        function closeConfirmModal() {
-            document.getElementById('confirm-modal').classList.add('hidden');
-        }
+        function closeConfirmModal() { document.getElementById('confirm-modal').classList.add('hidden'); }
 
-        function processRedeem() {
+        async function processRedeem() {
             if (!currentEmpId || !currentCouponData) return;
             
             const btn = document.getElementById('btn-confirm-redeem');
@@ -551,31 +508,31 @@
             closeConfirmModal();
             showLoading('กำลังบันทึกการทำรายการ...');
 
-            // เรียกใช้ Backend ผ่าน Fetch API
-            callGasApi('saveCoupon', { 
-                empId: currentEmpId, 
-                couponCode: currentCouponData.code, 
-                points: currentCouponData.points 
-            })
-            .then(response => {
+            try {
+                // เรียกใช้ API แทน google.script.run
+                const response = await callGasApi('redeemCoupon', {
+                    empId: currentEmpId,
+                    couponCode: currentCouponData.code,
+                    points: currentCouponData.points
+                });
+
                 hideLoading();
                 btn.disabled = false;
                 document.getElementById('txt-confirm-redeem').innerText = 'ยืนยัน';
                 
                 if (response.success) {
-                    closeRewardDetail(); // ปิดหน้าต่างสไลด์
+                    closeRewardDetail(); 
                     showMsg('ทำรายการสำเร็จ!', 'บันทึกการรับสิทธิ์เรียบร้อยแล้ว', true);
                     clearCouponDetails();
                 } else {
                     showMsg('ไม่สามารถบันทึกได้', response.message, false);
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 hideLoading();
                 btn.disabled = false;
                 document.getElementById('txt-confirm-redeem').innerText = 'ยืนยัน';
-                showMsg('ข้อผิดพลาด', err.message, false);
-            });
+                showMsg('ข้อผิดพลาด', err.message || "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", false);
+            }
         }
     </script>
 </body>
