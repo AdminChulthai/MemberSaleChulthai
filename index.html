@@ -2,11 +2,10 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ระบบสมาชิกฝ่ายขาย</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaleChulthai</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/0NP9YsLz/Logo-CTS.png">
+    
     <!-- ฟอนต์ K2D -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,17 +20,15 @@
             font-family: 'K2D', sans-serif;
             background-color: #f3f4f6;
             color: #1f2937;
-            overscroll-behavior: none;
         }
         .card-bg {
             background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
             color: white;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+        /* ซ่อนกล่องสแกนเนอร์ตอนเริ่มต้น */
         #reader { width: 100%; max-width: 400px; margin: 0 auto; display: none; overflow: hidden; border-radius: 1rem; }
         #reader video { border-radius: 1rem; object-fit: cover; }
-        
-        button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start pt-8 px-4 pb-24">
@@ -101,14 +98,15 @@
             </button>
         </div>
         
-        <div class="mt-6 text-center text-xs text-gray-400" id="version-text">
-            อัพเดทล่าสุด 09/03/2569
+        <div id="app-version-display" class="mt-6 text-center text-xs text-gray-400">
+            กำลังโหลดเวอร์ชัน...
         </div>
     </div>
 
     <!-- ==================== 2. หน้าหลัก (แอปพลิเคชัน) ==================== -->
     <div id="app-section" class="w-full max-w-md hidden opacity-0 transition-opacity duration-500">
         
+        <!-- ส่วนหัว Gradient Card -->
         <div class="card-bg rounded-3xl p-6 relative overflow-hidden mb-6">
             <div class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
@@ -135,6 +133,7 @@
             </div>
         </div>
 
+        <!-- หน้าใช้คูปอง (การ์ดขาว) -->
         <div id="home-tab" class="w-full mb-6">
             <h3 class="font-bold text-gray-800 mb-3 px-2 text-lg">สแกนหรือระบุรหัสคูปอง</h3>
             
@@ -157,6 +156,7 @@
             </div>
         </div>
 
+        <!-- หน้าเมนู (ซ่อนไว้เริ่มต้น) -->
         <div id="menu-tab" class="w-full hidden mb-6">
             <h3 class="font-bold text-gray-800 mb-3 px-2 text-lg">เมนูระบบ</h3>
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -246,30 +246,48 @@
 
     <!-- ==================== JavaScript ควบคุมการทำงาน ==================== -->
     <script>
-        // =========================================================================
-        // ⚠️ นำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ในบรรทัดด้านล่างนี้
-        // =========================================================================
-        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzwR4VoSvHf2xmlLkYE8z8vyFr_wISzoPdz9zrPpI6xZ-l8JhLk6pRnpENOiWXgR5-mww/exec";
+        // ========================================================
+        // ⚙️ ตั้งค่าส่วนที่ 2: ลิงก์เชื่อมต่อฐานข้อมูล GAS (API)
+        // ========================================================
+        const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzwR4VoSvHf2xmlLkYE8z8vyFr_wISzoPdz9zrPpI6xZ-l8JhLk6pRnpENOiWXgR5-mww/exec"; // <--- นำ URL ของ Web App มาใส่ตรงนี้
+        // ========================================================
 
         let currentEmpId = '';
         let currentCouponData = null;
-        let html5QrCode = null;
+        let html5QrcodeScanner = null;
         let isScanning = false;
 
-        // ---------- ระบบติดต่อ Backend (Fetch API) ----------
+        // 2. ฟังก์ชันหลักสำหรับสื่อสารกับ Backend (Fetch API)
         async function callGasApi(action, data = {}) {
+            if (GAS_WEBAPP_URL === "YOUR_GAS_WEB_APP_URL_HERE") {
+                showMsg("ข้อผิดพลาด", "กรุณาตั้งค่า GAS_WEBAPP_URL ในโค้ด HTML ก่อนใช้งาน", false);
+                throw new Error("Missing API URL");
+            }
             try {
                 const response = await fetch(GAS_WEBAPP_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: action, data: data }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // ป้องกัน CORS
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // สำคัญ: ป้องกันปัญหา CORS
                 });
                 return await response.json();
             } catch (error) {
-                console.error("API Fetch Error:", error);
+                console.error("API Error:", error);
                 throw error;
             }
         }
+
+        // ดึงเวอร์ชันเมื่อโหลดหน้าเว็บ
+        window.onload = () => {
+            if (GAS_WEBAPP_URL !== "YOUR_GAS_WEB_APP_URL_HERE") {
+                callGasApi('getAppVersion', {})
+                    .then(res => {
+                        if(res.success) {
+                            document.getElementById('app-version-display').innerText = res.version;
+                        }
+                    })
+                    .catch(err => console.log("โหลดเวอร์ชันไม่สำเร็จ", err));
+            }
+        };
 
         // ---------- ระบบ UI ทั่วไป ----------
         function showMsg(title, text, isSuccess = false) {
@@ -354,6 +372,7 @@
             const progBar = document.getElementById('progress-bar');
             const progText = document.getElementById('progress-text');
             
+            // อนิเมชั่นหลอดโหลดจำลอง
             let loadingInterval = setInterval(() => {
                 if (progress < 85) {
                     progress += Math.floor(Math.random() * 10) + 5;
@@ -363,7 +382,7 @@
                 }
             }, 150);
 
-            // ใช้ API ผ่าน fetch แทน google.script.run
+            // เรียกใช้ Backend ผ่าน Fetch API แทน google.script.run
             callGasApi('verifyLogin', { empId: empIdInput })
                 .then(response => {
                     if (response.success) {
@@ -381,6 +400,7 @@
                             document.getElementById('bottom-nav').classList.remove('hidden');
                             setTimeout(() => appSection.classList.remove('opacity-0'), 50);
                             
+                            // Reset
                             resetLoginUI();
                         }, 500);
                     } else {
@@ -392,7 +412,7 @@
                 .catch(err => {
                     clearInterval(loadingInterval);
                     resetLoginUI();
-                    showMsg('ข้อผิดพลาดการเชื่อมต่อ', err.message || 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', false);
+                    showMsg('ข้อผิดพลาด', err.message, false);
                 });
         }
 
@@ -415,7 +435,7 @@
             setTimeout(() => {
                 appSection.classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
-                switchTab('home'); 
+                switchTab('home'); // Reset tab
                 clearCouponDetails();
                 if(isScanning) toggleScanner();
             }, 300);
@@ -427,15 +447,12 @@
             const scanBtn = document.getElementById('scan-btn');
 
             if (isScanning) {
-                if (html5QrCode) {
-                    html5QrCode.stop().then(() => {
-                        html5QrCode.clear();
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.clear().then(() => {
                         readerDiv.style.display = 'none';
                         scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
                         scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
                         isScanning = false;
-                    }).catch(err => {
-                        console.error("Failed to stop scanner", err);
                     });
                 }
             } else {
@@ -444,45 +461,16 @@
                 scanBtn.className = 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-600 transition shadow-md flex justify-center items-center gap-2 mt-2';
                 isScanning = true;
 
-                if (!html5QrCode) {
-                    html5QrCode = new Html5Qrcode("reader");
-                }
-                
-                // เริ่มเปิดกล้องหลัง (environment)
-                html5QrCode.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    onScanSuccess,
-                    onScanFailure
-                ).catch((err) => {
-                    // กรณีเปิดกล้องไม่สำเร็จ
-                    isScanning = false;
-                    readerDiv.style.display = 'none';
-                    scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
-                    scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
-                    showMsg('เปิดกล้องไม่ได้', 'กรุณาอนุญาตให้เว็บเข้าถึงกล้อง หรือตรวจสอบว่าเปิดเว็บผ่าน HTTPS แล้ว', false);
-                });
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             }
         }
 
         function onScanSuccess(decodedText, decodedResult) {
             document.getElementById('coupon-input').value = decodedText;
-            
-            // ปิดกล้องหลังสแกนสำเร็จ
-            if (html5QrCode && isScanning) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear();
-                    document.getElementById('reader').style.display = 'none';
-                    const scanBtn = document.getElementById('scan-btn');
-                    scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
-                    scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
-                    isScanning = false;
-                    
-                    searchCoupon();  
-                });
-            } else {
-                searchCoupon();
-            }
+            toggleScanner(); 
+            searchCoupon();  
         }
         function onScanFailure(error) { /* ปล่อยผ่าน */ }
 
@@ -495,8 +483,8 @@
 
             showLoading('กำลังค้นหาข้อมูลคูปอง...');
 
-            // ใช้ API
-            callGasApi('searchCouponData', { couponCode: code })
+            // เรียกใช้ Backend ผ่าน Fetch API
+            callGasApi('searchCoupon', { couponCode: code })
                 .then(response => {
                     hideLoading();
                     if (response.found) {
@@ -508,7 +496,7 @@
                 })
                 .catch(err => {
                     hideLoading();
-                    showMsg('ข้อผิดพลาดการเชื่อมต่อ', err.message, false);
+                    showMsg('ข้อผิดพลาด', err.message, false);
                 });
         }
 
@@ -563,8 +551,8 @@
             closeConfirmModal();
             showLoading('กำลังบันทึกการทำรายการ...');
 
-            // ใช้ API
-            callGasApi('saveCouponUsage', { 
+            // เรียกใช้ Backend ผ่าน Fetch API
+            callGasApi('saveCoupon', { 
                 empId: currentEmpId, 
                 couponCode: currentCouponData.code, 
                 points: currentCouponData.points 
