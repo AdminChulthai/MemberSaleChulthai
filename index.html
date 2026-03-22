@@ -31,8 +31,8 @@
             color: white;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        /* ซ่อนกล่องสแกนเนอร์ตอนเริ่มต้น */
-        #reader { width: 100%; max-width: 400px; margin: 0 auto; display: none; overflow: hidden; border-radius: 1rem; }
+        /* ปรับแต่งกล่องสแกนเนอร์ใน Modal */
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; overflow: hidden; border-radius: 1rem; background-color: #000; }
         #reader video { border-radius: 1rem; object-fit: cover; }
         
         button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
@@ -57,6 +57,28 @@
             <h3 id="msg-title" class="text-xl font-bold mb-2 text-gray-800">แจ้งเตือน</h3>
             <p id="msg-text" class="text-sm text-gray-600 mb-6 whitespace-pre-wrap leading-relaxed"></p>
             <button onclick="closeMsg()" class="w-full bg-blue-800 text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors shadow-md">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- ==================== Modal สแกน QR Code ==================== -->
+    <div id="scanner-modal" class="fixed inset-0 z-[65] hidden flex flex-col items-center justify-center bg-black bg-opacity-90 backdrop-blur-sm transition-opacity">
+        <div class="w-full max-w-md p-6 flex flex-col justify-center relative">
+            <div class="flex justify-between items-center mb-6 text-white">
+                <h3 class="text-xl font-bold">สแกนคิวอาร์โค้ด</h3>
+                <button onclick="closeScannerModal()" class="p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <!-- กล่องแสดงกล้องสแกน -->
+            <div id="reader" class="border-2 border-gray-600 shadow-2xl"></div>
+            
+            <div class="mt-8 text-center w-full">
+                <button onclick="closeScannerModal()" class="w-full bg-red-600 text-white font-bold py-4 px-8 rounded-xl hover:bg-red-700 transition shadow-lg flex justify-center items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    ยกเลิกการสแกน
+                </button>
+            </div>
         </div>
     </div>
 
@@ -153,13 +175,10 @@
                     </button>
                 </div>
                 
-                <button onclick="toggleScanner()" id="scan-btn" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2">
+                <button onclick="openScannerModal()" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                     <span>สแกนคิวอาร์โค้ด</span>
                 </button>
-
-                <!-- กล่องแสดงกล้องสแกน -->
-                <div id="reader" class="mt-4 border-2 border-dashed border-blue-200 bg-blue-50 p-2"></div>
             </div>
         </div>
 
@@ -366,7 +385,7 @@
             activeNav.classList.add('text-blue-800', 'border-blue-800');
             
             // ปิดกล้องถ้าเปลี่ยนหน้า
-            if(tab !== 'home' && isScanning) toggleScanner();
+            if(tab !== 'home' && isScanning) closeScannerModal();
         }
 
         // ---------- ระบบเข้าสู่ระบบ ----------
@@ -449,56 +468,46 @@
                 document.getElementById('login-section').classList.remove('hidden');
                 switchTab('home'); // Reset tab
                 clearCouponDetails();
-                if(isScanning) toggleScanner();
+                if(isScanning) closeScannerModal();
             }, 300);
         }
 
         // ---------- ระบบค้นหาและสแกนคูปอง ----------
-        function toggleScanner() {
-            const readerDiv = document.getElementById('reader');
-            const scanBtn = document.getElementById('scan-btn');
+        function openScannerModal() {
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            isScanning = true;
 
-            if (isScanning) {
-                if (html5QrCode) {
-                    html5QrCode.stop().then(() => {
-                        html5QrCode.clear();
-                        readerDiv.style.display = 'none';
-                        scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
-                        scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
-                        isScanning = false;
-                    }).catch(err => {
-                        console.error("Failed to stop scanner", err);
-                    });
-                }
-            } else {
-                readerDiv.style.display = 'block';
-                scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg><span>ยกเลิกการสแกน</span>';
-                scanBtn.className = 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-red-600 transition shadow-md flex justify-center items-center gap-2 mt-2';
-                isScanning = true;
-
-                if (!html5QrCode) {
-                    html5QrCode = new Html5Qrcode("reader");
-                }
-                
-                // เริ่มเปิดกล้องหลัง (environment)
-                html5QrCode.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    onScanSuccess,
-                    onScanFailure
-                ).then(() => {
-                    // เมื่อเปิดกล้องสำเร็จ ให้เลื่อนหน้าจอลงมาที่กล่องสแกนอัตโนมัติ
-                    setTimeout(() => {
-                        readerDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 300);
-                }).catch((err) => {
-                    // กรณีเปิดกล้องไม่สำเร็จ
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            
+            // เริ่มเปิดกล้องหลัง (environment)
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess,
+                onScanFailure
+            ).catch((err) => {
+                // กรณีเปิดกล้องไม่สำเร็จ
+                isScanning = false;
+                document.getElementById('scanner-modal').classList.add('hidden');
+                showMsg('เปิดกล้องไม่ได้', 'กรุณาอนุญาตให้เว็บเข้าถึงกล้อง หรือตรวจสอบว่าเปิดเว็บผ่าน HTTPS แล้ว', false);
+            });
+        }
+        
+        function closeScannerModal() {
+            if (html5QrCode && isScanning) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
                     isScanning = false;
-                    readerDiv.style.display = 'none';
-                    scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
-                    scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
-                    showMsg('เปิดกล้องไม่ได้', 'กรุณาอนุญาตให้เว็บเข้าถึงกล้อง หรือตรวจสอบว่าเปิดเว็บผ่าน HTTPS แล้ว', false);
+                    document.getElementById('scanner-modal').classList.add('hidden');
+                }).catch(err => {
+                    console.error("Failed to stop scanner", err);
+                    isScanning = false;
+                    document.getElementById('scanner-modal').classList.add('hidden');
                 });
+            } else {
+                document.getElementById('scanner-modal').classList.add('hidden');
             }
         }
 
@@ -509,12 +518,8 @@
             if (html5QrCode && isScanning) {
                 html5QrCode.stop().then(() => {
                     html5QrCode.clear();
-                    document.getElementById('reader').style.display = 'none';
-                    const scanBtn = document.getElementById('scan-btn');
-                    scanBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg><span>สแกนคิวอาร์โค้ด</span>';
-                    scanBtn.className = 'w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-yellow-600 transition shadow-md flex justify-center items-center gap-2';
                     isScanning = false;
-                    
+                    document.getElementById('scanner-modal').classList.add('hidden');
                     searchCoupon();  
                 });
             } else {
