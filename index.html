@@ -273,6 +273,18 @@
             </div>
         </div>
         
+        <!-- ส่วนแสดงจำนวนแต้มและปริมาณสะสม -->
+        <div class="bg-white px-4 py-3 shadow-sm border-b border-gray-100 grid grid-cols-2 gap-3 z-10">
+            <div class="bg-blue-50 p-3 rounded-2xl border border-blue-100 text-center shadow-inner">
+                <p class="text-[10px] text-blue-600 font-bold uppercase tracking-wider mb-1">จำนวนแต้มสะสม</p>
+                <p id="modal-customer-points" class="text-xl font-bold text-blue-900 leading-none">0</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded-2xl border border-green-100 text-center shadow-inner">
+                <p class="text-[10px] text-green-600 font-bold uppercase tracking-wider mb-1">ปริมาณสะสม (ปี <span id="current-year-be"></span>)</p>
+                <p id="modal-customer-volume" class="text-xl font-bold text-green-900 leading-none">0</p>
+            </div>
+        </div>
+        
         <div class="flex-1 overflow-y-auto p-4" id="reward-cards-container">
             <!-- การ์ดของรางวัลจะถูกแทรกที่นี่ผ่าน JavaScript -->
         </div>
@@ -723,16 +735,17 @@
             // ตัดเอาเฉพาะรหัสลูกค้า 7 หลักแรก
             const customerId = inputVal.substring(0, 7);
             
-            showLoading('กำลังค้นหาข้อมูลของรางวัล...');
+            showLoading('กำลังค้นหาข้อมูล...');
             
             callGasApi('searchCustomerRewards', { customerId: customerId })
                 .then(response => {
                     hideLoading();
                     if (response.success) {
-                        if (response.data.length > 0) {
+                        // จะเปิด Modal ถ้ามีของรางวัลใช้งานได้ หรือมีจำนวนแต้มในระบบ App-01
+                        if (response.data.rewards.length > 0 || response.data.points !== "0") {
                             openCustomerRewardsModal(inputVal, response.data);
                         } else {
-                            showMsg('ไม่พบข้อมูล', 'ไม่พบประวัติของรางวัลสำหรับลูกค้าท่านนี้', false);
+                            showMsg('ไม่พบข้อมูล', 'ไม่พบประวัติของรางวัลหรือข้อมูลสะสมสำหรับลูกค้าท่านนี้', false);
                         }
                     } else {
                         showMsg('เกิดข้อผิดพลาด', response.message, false);
@@ -745,55 +758,69 @@
         }
 
         // 3. จัดการหน้าต่างแสดงประวัติของรางวัล
-        function openCustomerRewardsModal(customerName, rewardsData) {
+        function openCustomerRewardsModal(customerName, customerData) {
+            // แสดงข้อมูลส่วนหัว
             document.getElementById('modal-customer-name').innerText = customerName;
+            document.getElementById('modal-customer-points').innerText = Number(customerData.points || 0).toLocaleString();
+            document.getElementById('modal-customer-volume').innerText = Number(customerData.volume || 0).toLocaleString();
+            
+            // เซ็ตตัวเลขปี พ.ศ. ปัจจุบัน
+            const currentYearBE = new Date().getFullYear() + 543;
+            document.getElementById('current-year-be').innerText = currentYearBE;
             
             const container = document.getElementById('reward-cards-container');
             container.innerHTML = ''; // ล้างข้อมูลเก่า
             
-            // วนลูปสร้างการ์ดของรางวัล
-            rewardsData.forEach(item => {
-                
-                // แปลง Format วันที่และเวลาแลก
-                let formattedDate = formatDateTimeString(item.redeemDate);
+            // กรองสถานะและเรียงลำดับ
+            let rewardsData = customerData.rewards || [];
+            
+            // Backend กรองมาให้แล้วว่าเป็น 0=ใช้งานได้ แต่ดักไว้ให้แน่ใจอีกครั้ง
+            rewardsData = rewardsData.filter(item => item.status === '0');
+            
+            // เรียงลำดับจากวันใกล้หมดอายุให้ขึ้นก่อน
+            rewardsData.sort((a, b) => {
+                return parseThaiDateToTime(a.expiry) - parseThaiDateToTime(b.expiry);
+            });
+            
+            // กรณีไม่มีของรางวัลแต่มีแต้ม
+            if (rewardsData.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 mt-8 font-medium"><p>ไม่มีคูปองที่สามารถใช้งานได้ในขณะนี้</p></div>';
+            } else {
+                // วนลูปสร้างการ์ดของรางวัล
+                rewardsData.forEach(item => {
+                    // แปลง Format วันที่และเวลาแลก
+                    let formattedDate = formatDateTimeString(item.redeemDate);
 
-                // ตรวจสอบและกำหนดสไตล์ตามสถานะ (คอลัมน์ I)
-                let statusBadge = '';
-                if (item.status === '1') {
-                    statusBadge = `<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-gray-200 text-gray-700">ใช้แล้ว</span>`;
-                } else if (item.status === '2') {
-                    statusBadge = `<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-red-100 text-red-700">หมดอายุ</span>`;
-                } else {
-                    // สมมติฐานว่าถ้าไม่ใช่ 1 หรือ 2 ให้เป็น "ใช้งานได้"
-                    statusBadge = `<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-green-100 text-green-700">ใช้งานได้</span>`;
-                }
+                    // แสดงสถานะใช้งานได้เท่านั้น
+                    let statusBadge = `<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-green-100 text-green-700 shadow-sm">ใช้งานได้</span>`;
 
-                // การกำหนด URL รูปภาพและตั้งค่า Fallback กรณีไม่มีรูป
-                let imgHtml = '';
-                if(item.image) {
-                     imgHtml = `<img src="${item.image}" onerror="this.src='https://placehold.co/100x100/e2e8f0/475569?text=No+Img'" class="w-full h-full object-cover">`;
-                } else {
-                     imgHtml = `<img src="https://placehold.co/100x100/e2e8f0/475569?text=No+Img" class="w-full h-full object-cover">`;
-                }
+                    // การกำหนด URL รูปภาพและตั้งค่า Fallback กรณีไม่มีรูป
+                    let imgHtml = '';
+                    if(item.image) {
+                         imgHtml = `<img src="${item.image}" onerror="this.src='https://placehold.co/100x100/e2e8f0/475569?text=No+Img'" class="w-full h-full object-cover">`;
+                    } else {
+                         imgHtml = `<img src="https://placehold.co/100x100/e2e8f0/475569?text=No+Img" class="w-full h-full object-cover">`;
+                    }
 
-                const cardHTML = `
-                <div class="bg-white rounded-2xl p-4 shadow-sm mb-4 border border-gray-100 relative overflow-hidden">
-                    <div class="flex gap-4">
-                        <div class="w-20 h-20 rounded-xl bg-gray-50 flex-shrink-0 border border-gray-100 overflow-hidden">
-                            ${imgHtml}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-gray-800 text-sm mb-1 leading-tight truncate">${item.name || 'ไม่มีชื่อรางวัล'}</h4>
-                            <p class="text-xs text-gray-500 mb-0.5"><span class="font-semibold text-gray-600">รหัสคูปอง:</span> <span class="font-mono tracking-wider">${item.code || '-'}</span></p>
-                            <p class="text-[10px] text-gray-500 mb-0.5"><span class="font-semibold text-gray-600">วันหมดอายุ:</span> ${item.expiry || '-'}</p>
-                            <p class="text-[10px] text-gray-500 mb-2"><span class="font-semibold text-gray-600">วันที่แลก:</span> ${formattedDate}</p>
-                            <div>${statusBadge}</div>
+                    const cardHTML = `
+                    <div class="bg-white rounded-2xl p-4 shadow-sm mb-4 border border-gray-100 relative overflow-hidden">
+                        <div class="flex gap-4">
+                            <div class="w-20 h-20 rounded-xl bg-gray-50 flex-shrink-0 border border-gray-100 overflow-hidden">
+                                ${imgHtml}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-gray-800 text-sm mb-1 leading-tight truncate">${item.name || 'ไม่มีชื่อรางวัล'}</h4>
+                                <p class="text-[10px] text-gray-500 mb-0.5"><span class="font-semibold text-gray-600">รหัสคูปอง:</span> <span class="font-mono tracking-wider">${item.code || '-'}</span></p>
+                                <p class="text-[10px] text-gray-500 mb-0.5"><span class="font-semibold text-gray-600">วันหมดอายุ:</span> ${item.expiry || '-'}</p>
+                                <p class="text-[10px] text-gray-500 mb-2"><span class="font-semibold text-gray-600">วันที่แลก:</span> ${formattedDate}</p>
+                                <div>${statusBadge}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                `;
-                container.insertAdjacentHTML('beforeend', cardHTML);
-            });
+                    `;
+                    container.insertAdjacentHTML('beforeend', cardHTML);
+                });
+            }
 
             // เปิด Modal
             const modal = document.getElementById('customer-rewards-modal');
@@ -807,32 +834,46 @@
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
+        // Helper สำหรับแปลง string วันที่ "dd/mm/yyyy" เป็น timestamp เพื่อใช้ Sort เทียบเวลา
+        function parseThaiDateToTime(str) {
+            if (!str) return Infinity; // ถ้าไม่มีข้อมูลให้อยู่ท้ายสุด
+            try {
+                let datePart = str.split(' ')[0];
+                let parts = datePart.split('/');
+                if (parts.length === 3) {
+                    let d = parseInt(parts[0], 10);
+                    let m = parseInt(parts[1], 10) - 1;
+                    let y = parseInt(parts[2], 10);
+                    if (y > 2500) y -= 543; // แปลง พ.ศ. กลับเป็น ค.ศ.
+                    return new Date(y, m, d).getTime();
+                }
+                let time = Date.parse(str);
+                return isNaN(time) ? Infinity : time;
+            } catch(e) {
+                return Infinity;
+            }
+        }
+
         // Helper จัดรูปแบบวันที่และเวลาจาก Google Sheet
         function formatDateTimeString(rawStr) {
             if (!rawStr) return "-";
-            
-            // ปกติแล้ว data จาก getDisplayValues() ของ GAS อาจจะเป็นวันที่ตาม Format ที่ตั้งไว้ใน Sheet (เช่น 14/03/2026 10:30:00)
-            // ฟังก์ชันนี้จะพยายาม Format ให้อยู่ในรูป "dd/mm/yyyy, hh:mm" เสมอ ถ้าแปลผลไม่ได้จะคืนค่าเดิม
             try {
                 let d = new Date(rawStr);
-                // ถ้า Date(rawStr) ทำงานได้ปกติ (ไม่ได้เป็น Invalid Date)
                 if (!isNaN(d.getTime())) {
                     let day = String(d.getDate()).padStart(2, '0');
                     let month = String(d.getMonth() + 1).padStart(2, '0');
-                    let year = d.getFullYear(); // เอาปี ค.ศ. ถ้าอยากได้ พ.ศ. ให้บวก 543
+                    let year = d.getFullYear(); 
                     let hh = String(d.getHours()).padStart(2, '0');
                     let mm = String(d.getMinutes()).padStart(2, '0');
                     return `${day}/${month}/${year}, ${hh}:${mm}`;
                 }
             } catch (e) { }
             
-            // กรณีเป็น String ที่จัดมาแล้วจาก Sheet ให้พยายามแปลงนิดหน่อย
-            // ตัวอย่าง: ถ้ามาเป็น "14/03/2569 15:30:00" เราสามารถตัดวินาทีออก
             if(rawStr.includes(" ")) {
                  let parts = rawStr.split(" ");
                  if(parts.length >= 2) {
                      let datePart = parts[0];
-                     let timePart = parts[1].split(":").slice(0,2).join(":"); // เอาแค่ ชม:นาที
+                     let timePart = parts[1].split(":").slice(0,2).join(":");
                      return `${datePart}, ${timePart}`;
                  }
             }
