@@ -741,11 +741,11 @@
                 .then(response => {
                     hideLoading();
                     if (response.success) {
-                        // จะเปิด Modal ถ้ามีของรางวัลใช้งานได้ หรือมีจำนวนแต้มในระบบ App-01
-                        if (response.data.rewards.length > 0 || response.data.points !== "0") {
+                        // จะเปิด Modal ถ้าพบข้อมูลลูกค้าใน App-01 หรือมีของรางวัลใน App-02
+                        if (response.data.foundInApp01 || response.data.rewards.length > 0) {
                             openCustomerRewardsModal(inputVal, response.data);
                         } else {
-                            showMsg('ไม่พบข้อมูล', 'ไม่พบประวัติของรางวัลหรือข้อมูลสะสมสำหรับลูกค้าท่านนี้', false);
+                            showMsg('ไม่พบข้อมูล', 'ไม่พบประวัติของรางวัลและข้อมูลสะสมสำหรับลูกค้าท่านนี้', false);
                         }
                     } else {
                         showMsg('เกิดข้อผิดพลาด', response.message, false);
